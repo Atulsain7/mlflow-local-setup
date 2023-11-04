@@ -1,0 +1,44 @@
+version: '3.7'
+services:
+
+  mlflow:
+    container_name: mlflow-local
+    build:
+      context: ./mlflow
+      dockerfile: Dockerfile
+      args:
+        - USER_NAME=atul
+        - USER_ID=1234
+        - USER_EMAIL=atulsain16111617@gmail.com
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    volumes:
+      - ./mlflow:/mlflow
+    env_file:
+      - .envs/.env
+
+  postgres:
+    container_name: postgres-local
+    image: postgres:latest
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    env_file:
+      - .envs/.postgres
+
+  app:
+    container_name: app-local
+    build:
+      context: ./experiments
+      dockerfile: Dockerfile
+      args:
+        - USER_ID=1234
+        - USER_NAME=atul
+        - USER_EMAIL=atulsain16111617@gmail.com
+    volumes:
+      - ./experiments:/experiments
+    depends_on:
+      - mlflow
+    env_file:
+      - .envs/.env
